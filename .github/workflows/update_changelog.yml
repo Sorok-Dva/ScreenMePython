@@ -1,0 +1,39 @@
+name: Update Changelog
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+
+    - name: Run update_changelog.py
+      run: |
+        version=$(echo ${GITHUB_REF#refs/tags/})
+        changes="Automated changelog update"
+        python update_changelog.py $version $changes
+
+    - name: Commit changes
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add CHANGELOG.md
+        git commit -m "Update changelog for ${{ github.ref_name }}"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
