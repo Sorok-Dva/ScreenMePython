@@ -1,8 +1,8 @@
 {
-  "screenshot_hotkey": "print_screen",
-  "fullscreen_hotkey": "f11",
-  "file_extension": "png",
-  "default_save_folder": "./screenshots",
-  "start_with_system": false,
-  "image_quality": 100
+    "screenshot_hotkey": "I+ctrl+shift",
+    "fullscreen_hotkey": "f11",
+    "file_extension": "png",
+    "default_save_folder": "./screenshots",
+    "start_with_system": true,
+    "image_quality": 100
 }

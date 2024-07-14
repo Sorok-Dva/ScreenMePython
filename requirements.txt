@@ -1,6 +1,6 @@
-PyQt5==5.15.4
-Pillow==8.2.0
-pystray==0.17.2
+PyQt5==5.15.7
+pyscreeze==0.1.30
+Pillow==9.3.0
 # keyboard & pyautogui are related to Windows
 keyboard==0.13.5
 pyautogui==0.9.53

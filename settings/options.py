@@ -1,13 +1,18 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QComboBox, QSpinBox, QCheckBox
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QComboBox, QSpinBox, \
+    QCheckBox
 import keyboard
+
 
 class OptionsWindow(QDialog):
     def __init__(self, config_manager):
         super().__init__()
         self.config_manager = config_manager
         self.config = self.config_manager.load_config()
+        self.setAttribute(Qt.WA_QuitOnClose, False)  # Prevent the application from quitting
         self.initUI()
+        self.hotkey_editing = None
+        self.current_keys = []
 
     def initUI(self):
         self.setWindowTitle('Options')
@@ -18,7 +23,7 @@ class OptionsWindow(QDialog):
         self.hotkey_edit = QLineEdit(self.config['screenshot_hotkey'])
         self.hotkey_edit.setPlaceholderText('Press any key...')
         self.hotkey_edit.setReadOnly(True)
-        self.hotkey_edit.mousePressEvent = self.record_hotkey
+        self.hotkey_edit.mousePressEvent = self.start_recording_hotkey
         layout.addWidget(self.hotkey_edit)
 
         # Fullscreen hotkey
@@ -26,7 +31,7 @@ class OptionsWindow(QDialog):
         self.fullscreen_hotkey_edit = QLineEdit(self.config['fullscreen_hotkey'])
         self.fullscreen_hotkey_edit.setPlaceholderText('Press any key...')
         self.fullscreen_hotkey_edit.setReadOnly(True)
-        self.fullscreen_hotkey_edit.mousePressEvent = self.record_fullscreen_hotkey
+        self.fullscreen_hotkey_edit.mousePressEvent = self.start_recording_fullscreen_hotkey
         layout.addWidget(self.fullscreen_hotkey_edit)
 
         # File extension
@@ -63,19 +68,32 @@ class OptionsWindow(QDialog):
 
         self.setLayout(layout)
 
-    def record_hotkey(self, event):
+    def start_recording_hotkey(self, event):
         self.hotkey_edit.setText('')
         self.hotkey_edit.setPlaceholderText('Press any key...')
-        keyboard.start_recording()
-        keys = keyboard.get_hotkey_name(keyboard.stop_recording())
-        self.hotkey_edit.setText(keys)
+        self.hotkey_editing = self.hotkey_edit
+        self.current_keys = []
+        keyboard.unhook_all()
+        keyboard.hook(self.record_key)
 
-    def record_fullscreen_hotkey(self, event):
+    def start_recording_fullscreen_hotkey(self, event):
         self.fullscreen_hotkey_edit.setText('')
         self.fullscreen_hotkey_edit.setPlaceholderText('Press any key...')
-        keyboard.start_recording()
-        keys = keyboard.get_hotkey_name(keyboard.stop_recording())
-        self.fullscreen_hotkey_edit.setText(keys)
+        self.hotkey_editing = self.fullscreen_hotkey_edit
+        self.current_keys = []
+        keyboard.unhook_all()
+        keyboard.hook(self.record_key)
+
+    def record_key(self, event):
+        if event.event_type == 'down':
+            if event.name not in self.current_keys:
+                self.current_keys.append(event.name)
+            keys = '+'.join(sorted(self.current_keys))
+            self.hotkey_editing.setText(keys)
+        elif event.event_type == 'up':
+            keyboard.unhook_all()
+            self.hotkey_editing = None
+            self.current_keys = []
 
     def select_folder(self):
         folder = QFileDialog.getExistingDirectory(self, 'Select Folder')
@@ -91,4 +109,4 @@ class OptionsWindow(QDialog):
         self.config['start_with_system'] = self.start_with_system_checkbox.isChecked()
 
         self.config_manager.save_config(self.config)
-        self.accept()  # Ferme la fenêtre après avoir enregistré les options
+        self.accept()  # Close the window after saving options
