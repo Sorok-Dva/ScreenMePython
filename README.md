@@ -3,6 +3,10 @@
 
 ScreenMe is a screenshot utility that allows you to capture screenshots, select specific areas, and edit them with tools like adding text, shapes (circle, rectangle, arrow), and changing colors. The application also provides options to configure hotkeys, image format, image quality, and the default save folder.
 
+## ⚠️ Unmaintened 
+
+The ScreenMe project was initially designed with Python, but it was preferable to use another language, like C++. As a result, the Python version of the project is now discontinued, but the C++ version has been finalized and is available here : [ScreenMe](https://github.com/Sorok-Dva/ScreenMe)
+
 ## Features
 
 - Capture full screen or selected area screenshots.
